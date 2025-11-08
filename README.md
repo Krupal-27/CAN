@@ -44,4 +44,4 @@ This project implements a complete CAN (Controller Area Network) bus protocol in
 - **Error Handling**: CRC verification and frame validation
 - **Bus States**: Dominant (0) and Recessive (1)
 
-## 📁 Project Structure
+
