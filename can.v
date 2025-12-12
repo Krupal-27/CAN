@@ -117,8 +117,8 @@ always @(posedge clk or posedge rst) begin
         f4_valid <= 0;
         cons_count <= 0;
         last_bit <= 1'b1; // Recessive stage  nothin is transmitted yet
-        bit_index <= 0; // around 98 bits total, less than 127 - so 7 bits is plenty
-         next_bit <= 1'b1; // ADD THIS LINE
+        bit_index <= 0; 
+         next_bit <= 1'b1; 
     end else if(f3_valid) begin
         f4_valid <= 1'b1; // PASS TO NEXT STAGE
         f4_id    <= f3_id;
@@ -130,16 +130,16 @@ always @(posedge clk or posedge rst) begin
         f4_crc   <= f3_crc;
         // initialize stuff counter  
         last_bit <= 1'b1; // Recessive stage before SOF
-        cons_count <= 3 'b0;
+        cons_count <= 3'b0;
         bit_index <= 0; 
         end else if(f4_valid) begin
-        f4_valid <= 1'b1; // KEEP VALID
+        f4_valid <= 1'b1; 
         end else begin
         f4_valid <= 0;
     end
 end
 
-// Bus Arbitration & Transmit - FIXED VERSION
+// Bus Arbitration & Transmit 
 always @(posedge clk or posedge rst) begin
     if(rst) begin
         tx <= 1'b1; // Recessive state
@@ -165,7 +165,7 @@ always @(posedge clk or posedge rst) begin
         if (bit_index == 0) begin
             next_bit = 1'b0; // SOF
         end else if (bit_index <= 11) begin
-            next_bit = f4_id[11 - bit_index]; // ID MSB first
+            next_bit = f4_id[11 - bit_index]; // MSB first bit_index = 1 → transmit f4_id[10]
         end else if (bit_index == 12) begin
             next_bit = f4_rtr;
         end else if (bit_index == 13) begin
@@ -173,15 +173,15 @@ always @(posedge clk or posedge rst) begin
         end else if (bit_index == 14) begin
             next_bit = f4_r0;
         end else if (bit_index >= 15 && bit_index < 19) begin
-            next_bit = f4_dlc[18 - bit_index]; // DLC[3:0]
-        end else if (bit_index >= 19 && bit_index < (19 + f4_dlc * 8)) begin
+            next_bit = f4_dlc[18 - bit_index]; // DLC[3:0] DLC bits 18 - bit index 15
+        end else if (bit_index >= 19 && bit_index < (19 + f4_dlc * 8)) begin //  between 19 to  83 is  data field  bits
             // Data bits: compute byte and bit inside byte
             byte_index = (bit_index - 19) / 8;
-            bit_position = 7 - ((bit_index - 19) % 8);
-            next_bit = f4_data[byte_index*8 + bit_position];
+            bit_position = 7 - ((bit_index - 19) % 8); //Determine the bit position inside that byte global frame bit index → correct data bit:
+            next_bit = f4_data[byte_index*8 + bit_position]; // Pick that bit from the 64-bit data
         end else if (bit_index >= (19 + f4_dlc * 8) && bit_index < (19 + f4_dlc * 8 + 15)) begin
             // CRC bits [14:0]
-            crc_bit_index = 14 - (bit_index - (19 + f4_dlc * 8));
+            crc_bit_index = 14 - (bit_index - (19 + f4_dlc * 8)); // For sending msb first  14 - 83 -83
             next_bit = f4_crc[crc_bit_index];
         end else begin
             next_bit = 1'b1; // Recessive after CRC (default)
@@ -207,7 +207,7 @@ always @(posedge clk or posedge rst) begin
         end
 
         // End of frame condition  
-        if (bit_index >= (19 + f4_dlc * 8 + 15 + 7)) begin // account for possible stuff bits
+        if (bit_index >= (19 + f4_dlc * 8 + 15 + 7)) begin // last bit transmitted
             busy <= 1'b0;
             done <= 1'b1;
             bus_busy <= 1'b0;
@@ -219,7 +219,7 @@ always @(posedge clk or posedge rst) begin
             done <= 1'b0; // clear done flag after one cycle
         end
         // When not busy, ensure TX is recessive
-        if (!bus_busy) begin
+        if (!bus_busy) begin  
             tx <= 1'b1;
         end
     end
@@ -286,7 +286,7 @@ always @(posedge clk or posedge rst) begin
         r0 <= 1'b0;
         stuff_count <= 3'b0;
         skip <= 1'b0;
-        last_bit <= 1'b1;
+        last_bit <= 1'b1; // recessive state 
         bit_idx <= 4'b0;
         byte_idx <= 4'b0;
         dlc_index <= 4'd3;
@@ -294,7 +294,7 @@ always @(posedge clk or posedge rst) begin
         data_byte <= 8'b0;
         rx_crc <= 15'b0;
     end else begin
-        // Auto-clear rx_valid after one cycle
+        
         if (rx_valid) begin
             rx_valid <= 1'b0;
         end
@@ -327,10 +327,10 @@ always @(posedge clk or posedge rst) begin
                     
                     last_bit <= can_rx;
                     
-                    if (stuff_count == 3'd5)
+                    if (stuff_count == 3'd5)  // ignore it  because of stuff bits
                         skip <= 1'b1;
 
-                    if (can_rx === 1'b0 || can_rx === 1'b1) begin
+                    if (can_rx === 1'b0 || can_rx === 1'b1) begin // recived bits is 0 or 1 as sometime unknown and high-impedance
                         rx_id[bit_idx] <= can_rx;
                     end
                     
@@ -432,10 +432,10 @@ always @(posedge clk or posedge rst) begin
                     end
                     
                     if (dlc_index == 0) begin
-                        if (rx_dlc == 4'b0000) begin
+                        if (rx_dlc == 4'b0000) begin // There are no data bytes at all
                             state <= RX_CRC;
                         end else begin
-                            state <= RX_DATA;
+                            state <= RX_DATA;  // if dlc have data then begin
                             byte_idx <= 4'b0;
                             bit_idx <= 4'd7;
                             rx_data <= 64'b0;
@@ -485,7 +485,7 @@ always @(posedge clk or posedge rst) begin
                         end else begin
                             byte_idx <= byte_idx + 1;
                             data_byte <= 8'b0;
-                            bit_idx <= 4'd7;
+                            bit_idx <= 4'd7; // Start receiving the next byte from MSB first
                         end
                     end else begin
                         bit_idx <= bit_idx - 1;
