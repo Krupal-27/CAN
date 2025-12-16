@@ -45,7 +45,7 @@ reg         f4_r0;
 reg [3:0]  f4_dlc;
 reg [63:0] f4_data;
 reg [14:0] f4_crc;
-reg [2:0]  cons_count; // consecutive bit counter counter same 5 bits 
+reg [2:0]  cons_count; // consecutive bit counter  same 5 bits 
 reg        last_bit;   // last bit value
 reg [6:0]  bit_index;   // which bit transfering now why 7 because 
                         // SOF+Header (19) + Data (64) + CRC (15) = 98 bits
@@ -54,9 +54,9 @@ reg bus_busy;
 
 // Module-level declarations - FIXED
 reg next_bit;               // next bit to transmit
-reg [7:0] byte_index;       // for data byte calculation - CHANGED from 'byte'
-reg [3:0] bit_position;     // for bit within a byte - CHANGED from 'bit'  
-reg [3:0] crc_bit_index;    // for CRC bit calculation - CHANGED from 'crc_bit'
+reg [7:0] byte_index;       // for data byte calculation 
+reg [3:0] bit_position;     // for bit within a byte 
+reg [3:0] crc_bit_index;    // for CRC bit calculation 
 
 //STAGE 1 Frame Loader
 always @(posedge clk or posedge rst) begin
@@ -129,7 +129,7 @@ always @(posedge clk or posedge rst) begin
         f4_data  <= f3_data;
         f4_crc   <= f3_crc;
         // initialize stuff counter  
-        last_bit <= 1'b1; // Recessive stage before SOF
+        last_bit <= 1'b1; // Recessive stage before SOF last bitt 1 
         cons_count <= 3'b0;
         bit_index <= 0; 
         end else if(f4_valid) begin
