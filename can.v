@@ -4,7 +4,7 @@ module can_tx(
     input        start,
     input [10:0] id, //  11 BIT CAN IDENTIFIER 
     input [3:0]  dlc, // DATA LENGTH CODE 0-8
-    input [63:0] data,// UP TO &$ BITS DATA (8 BYTES)
+    input [63:0] data,// UP TO 64 BITS DATA (8 BYTES)
     output reg   tx,
     output reg   busy,
     output reg   done
