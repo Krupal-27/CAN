@@ -111,7 +111,7 @@ always @(posedge clk or posedge rst) begin
                         rx_id[bit_idx] <= can_rx;
                     end
                     
-                    if (bit_idx == 0) begin
+                    if (bit_idx == 0) begin // WE RECEIVED LAST BIT OF  IDX
                         state <= RX_RTR;
                     end else begin
                         bit_idx <= bit_idx - 1;
